@@ -1,7 +1,9 @@
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
+using namespace chrono;
 
 typedef double type_point;
 
@@ -107,12 +109,33 @@ int main(int argc, char* argv[]) {
 	double epsilon = EPSILON;
 
 	// query
+	int path_len = strlen(argv[2]) + 2;
+	char* path = (char*)calloc(path_len, sizeof(char));
+	path[0] = 'c';
+	strcpy_s(path + 1, path_len, argv[2]);
+
+	FILE* output = NULL;
+	fopen_s(&output, path, "w");
+	fprintf(output, "%d\n", query_size);
+
+	char* path_time = (char*)calloc(path_len, sizeof(char));
+	path_time[0] = 't';
+	strcpy_s(path_time + 1, path_len, argv[2]);
+
+	FILE* output_time = NULL;
+	fopen_s(&output_time, path_time, "w");
+
+	system_clock::time_point start, end;
+	duration<double> sec;
+	printf("q:%d\n", query_size);
+
 	for (int i = 0; i < query_size; i++) {
 		Point* result = new Point[k];	// save 1st minimum ~ kth distance
 		double distance = 0;
-
+#ifdef DEBUG
 		printf("query #%d: (%g %g)\n", i, queries[i].coords[X], queries[i].coords[Y]);
-
+#endif // DEBUG
+		start = system_clock::now();
 		for (int j = 0; j < input_size; j++) {
 			distance = sqrt(pow(inputs[j].coords[X] - queries[i].coords[X], 2) + pow(inputs[j].coords[Y] - queries[i].coords[Y], 2));
 
@@ -127,9 +150,19 @@ int main(int argc, char* argv[]) {
 			result[r].distance = distance;
 			qsort(result, k, sizeof(Point), compare);
 		}
-		for (int j = 0; j < k; j++)
+		end = system_clock::now();
+		sec = end - start;
+		fprintf(output_time, "%g\n", sec);
+
+		for (int j = 0; j < k; j++) {
+#ifdef DEBUG
 			printf("(%g %g) %g\n", result[j].coords[X], result[j].coords[Y], result[j].distance);
+#endif // DEBUG
+			fprintf(output, "%g %g\n", result[j].coords[X], result[j].coords[Y]);
+		}
 	}
+	fclose(output);
+	fclose(output_time);
 
 	printf("done.\n");
 	END(0);
