@@ -30,20 +30,31 @@ int main(int argc, char* argv[]) {
 		END(2);
 	}
 
-	int cnt_wrong = 0;
-	double cx, cy;
-	double ax, ay;
+	int cnt_wrong = c_size;
 	double ct, at;
 	double sum_ct = 0, sum_at = 0;
+
+	double* c_item = (double*)calloc(c_size * 2, sizeof(double));
+	double* a_item = (double*)calloc(c_size * 2, sizeof(double));
+
 	for (int i = 0; i < c_size; i++) {
-		fscanf_s(correct, "%lf %lf", &cx, &cy);
-		fscanf_s(answer, "%lf %lf", &ax, &ay);
+		fscanf_s(correct, "%lf %lf", &(c_item[i * 2]), &(c_item[i * 2 + 1]));
+		fscanf_s(answer, "%lf %lf", &(a_item[i * 2]), &(a_item[i * 2 + 1]));
 		fscanf_s(correct_time, "%lf", &ct);
 		fscanf_s(answer_time, "%lf", &at);
-		if (cx != ax || cy != ay) cnt_wrong++;
 		sum_ct += ct;
 		sum_at += at;
 	}
+
+	for (int i = 0; i < c_size; i++) {
+		for (int j = 0; j < c_size; j++) {
+			if (c_item[i * 2] != a_item[j * 2]) continue;
+			if (c_item[i * 2 + 1] != a_item[j * 2 + 1]) continue;
+			cnt_wrong--;
+			break;
+		}
+	}
+
 	printf("%g\n",cnt_wrong/(double)c_size*100);
 	printf("c: %g\ta: %g\n", sum_ct / c_size, sum_at / c_size);
 	printf("done.\n");
